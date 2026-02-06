@@ -21,17 +21,23 @@ class SpotifyAnalyzer:
         
     def _preprocesData(self):
         """Internal method for cleaning and transformation of data"""
-        # Removal of unecesary data, might add some more later
+
         self.df = self.df.drop(columns=["ip_addr", "spotify_track_uri", "platform", "offline_timestamp", "conn_country", "offline", "incognito_mode", "episode_name", "episode_show_name", "spotify_episode_uri", "audiobook_title", "audiobook_chapter_uri", "audiobook_chapter_title"])
         self.df['ts'] = pd.to_datetime(self.df['ts'])
 
-        # Create new date columns for better search
         self.df['month'] = self.df['ts'].dt.to_period('M')
         self.df['hour'] = self.df['ts'].dt.hour
+
         
-        # Change from miliseconds to seconds
         self.df["ms_played"] = self.df['ms_played'] / 1000
-        self.df.rename(columns={'ms_played': 'sec_played', 'master_metadata_album_artist_name': 'artist_name','master_metadata_track_name': "track_name" }, inplace=True)
+        self.df.rename(columns={'ms_played': 'sec_played', 
+                                'master_metadata_album_artist_name': 'artist_name',
+                                'master_metadata_track_name': "track_name",
+                                "master_metadata_album_album_name": "album_name",
+                                }, 
+                       inplace=True)
+
+        self.df['track_with_artist'] = self.df["track_name"] + ' - ' + self.df["artist_name"]
     
     def printTimeSpentListening(self) -> None:
         """Prints the play time."""
@@ -83,9 +89,9 @@ class SpotifyAnalyzer:
         if count < 1:
             raise ValueError("Add valid count number")
 
-        songs = self.getTopSongsByPlay(count)
+        
         print(f"\nTOP {count} SONGS BY TIMES PLAYED")
-        print(songs)
+        print(self.getTopSongsByPlay(count))
     
     def getTopHours(self, count: int = 5) -> pd.DataFrame:
         """Returns top 'count' hours in a day, with most plays"""
@@ -99,9 +105,9 @@ class SpotifyAnalyzer:
         if count < 1 or count > 24:
             raise ValueError("Add valid count number")
 
-        hours = self.getTopHours(count)
         print(f"\nTOP {count} HOURS IN A DAY BY SONGS PLAYED")
-        print(hours)
+        print(self.getTopHours(count)
+)
 
     def getTopMonths(self, count: int = 5) -> pd.DataFrame:
         """Returns top 'count' months, with most plays"""
@@ -115,12 +121,9 @@ class SpotifyAnalyzer:
         if count < 1 or count > 12:
             raise ValueError("Add valid count number")
 
-        months = self.getTopMonths(count)
         print(f"\nTOP {count} MONTHS BY SONGS PLAYED")
-        print(months)
+        print(self.getTopMonths(count))
 
-
-    #TODO ADD TOP AUTHORS IN THESE MONTHS
 
     def getTopUniqueMonths(self, count: int = 5) -> pd.DataFrame:
         """Returns top 'count' unique months, with most plays"""
@@ -129,7 +132,7 @@ class SpotifyAnalyzer:
 
         result = self.df.groupby('month').agg(plays_count = ('track_name', 'count'), 
                                               top_artist = ('artist_name', lambda x: x.value_counts().idxmax()), 
-                                              top_track = ('track_name', lambda x: x.value_counts().idxmax()))
+                                              top_track = ('track_with_artist', lambda x: x.value_counts().idxmax()))
         return result.sort_values('plays_count', ascending=False).head(count)
 
     def printTopUniqueMonths(self, count: int = 5) -> None:
@@ -140,8 +143,23 @@ class SpotifyAnalyzer:
         months = self.getTopUniqueMonths(count)
         print(f"\nTOP {count} UNIQUE MONTHS BY SONGS PLAYED")
         print(months)
+    
+    def getTopAlbums(self, count):
+        """ Returns top 'count' top listened albums by songs played """
+        if count < 1:
+            raise ValueError("Add valid count number")
+        return self.df['album_name'].value_count().head(count) 
 
+    def printTopAlbums(self, count):
+        """ Print top 'count' top listened albums by songs played """
+        if count < 1:
+            raise ValueError("Add valid count number")
+
+
+        print(f"\nTOP {count} ALBUMS BY SONGS PLAYED")
+        print(self.getTopAlbums(count))
 
 
 MyTop = SpotifyAnalyzer("data", 'Martin', "Horak")
 print(MyTop.printTopUniqueMonths(12))
+print(MyTop.printTopAlbums(10))
