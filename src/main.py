@@ -38,6 +38,7 @@ class SpotifyAnalyzer:
                        inplace=True)
 
         self.df['track_with_artist'] = self.df["track_name"] + ' - ' + self.df["artist_name"]
+        self.df['album_with_artist'] = self.df["album_name"] + ' - ' + self.df["artist_name"]
     
     def printTimeSpentListening(self) -> None:
         """Prints the play time."""
@@ -148,7 +149,7 @@ class SpotifyAnalyzer:
         """ Returns top 'count' top listened albums by songs played """
         if count < 1:
             raise ValueError("Add valid count number")
-        return self.df['album_name'].value_count().head(count) 
+        return self.df['album_with_artist'].value_counts().head(count) 
 
     def printTopAlbums(self, count):
         """ Print top 'count' top listened albums by songs played """
