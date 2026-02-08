@@ -2,21 +2,20 @@ import pandas as pd
 import glob 
 
 class SpotifyAnalyzer:
-    def __init__(self, folderPath: str, fName: str, sName: str) -> None:
+    def __init__(self, uploadedFiles = None, folderPath: str = None, fName: str, sName: str) -> None:
         self.fName = fName
         self.sName = sName 
-        
-        path = f'{folderPath}/Streaming_History_Audio*.json'
-        files = glob.glob(path)
 
-        if not files:
+        if uploadedFiles:
+            dfList = [pd.read_json(f) for f in uploadedFiles]
+        elif folderPath: 
+            path = f'{folderPath}/Streaming_History_Audio*.json'
+            files = glob.glob(path)
+            dfList = [pd.read_json(f) for f in files]
+        else:
             raise FileNotFoundError("Couldn't find")
 
-        # Raw nputs files into a list and the concats them together into a single Data Frame 
-        dfList = [pd.read_json(f) for f in files]
         self.df = pd.concat(dfList, ignore_index=True)
-
-        # Prepares data
         self._preprocesData()
         
     def _preprocesData(self):
