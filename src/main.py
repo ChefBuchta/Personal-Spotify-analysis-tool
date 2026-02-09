@@ -24,7 +24,7 @@ class SpotifyAnalyzer:
         self.df = self.df.drop(columns=["ip_addr", "spotify_track_uri", "platform", "offline_timestamp", "conn_country", "offline", "incognito_mode", "episode_name", "episode_show_name", "spotify_episode_uri", "audiobook_title", "audiobook_chapter_uri", "audiobook_chapter_title"])
         self.df['ts'] = pd.to_datetime(self.df['ts'])
         
-        self.year['year'] = self.df['ts'].dt.year
+        self.df['year'] = self.df['ts'].dt.year
         self.df['month'] = self.df['ts'].dt.to_period('M')
         self.df['hour'] = self.df['ts'].dt.hour
 
