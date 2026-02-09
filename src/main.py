@@ -169,9 +169,19 @@ class SpotifyAnalyzer:
                                               top_artist = ('artist_name', lambda x: x.value_counts().idxmax()), 
                                               top_track = ('track_with_artist', lambda x: x.value_counts().idxmax()),
                                               top_album = ('album_name', lambda x: x.value_counts().idxmax()),
-                                              time_spent = ('ts', 'sum'))
+                                             time_spent = ('sec_played', lambda x: (x.sum() / 3600).round(2)))
 
-        return result_values('year', ascending=False).head(count)
+        return result.sort_values('year', ascending=False).head(count)
+
+        def getOptPerYear(self, count: int = 10, year: str = "All", opt: str = "Artists"): 
+            dfF = self.df 
+            if year != "All":
+                dfF = dfF[dfF['year'] == int(year)]
+            
+            if opt == "Aritsts":
+            
+            elif opt == "Songs":
+
+            else:
 
 
-    
