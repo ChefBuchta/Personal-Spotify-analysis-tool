@@ -2,7 +2,7 @@ import pandas as pd
 import glob 
 
 class SpotifyAnalyzer:
-    def __init__(self, uploadedFiles = None, folderPath: str = None, fName: str, sName: str) -> None:
+    def __init__(self, fName: str, sName: str, uploadedFiles = None, folderPath: str = None) -> None:
         self.fName = fName
         self.sName = sName 
 
@@ -23,7 +23,8 @@ class SpotifyAnalyzer:
 
         self.df = self.df.drop(columns=["ip_addr", "spotify_track_uri", "platform", "offline_timestamp", "conn_country", "offline", "incognito_mode", "episode_name", "episode_show_name", "spotify_episode_uri", "audiobook_title", "audiobook_chapter_uri", "audiobook_chapter_title"])
         self.df['ts'] = pd.to_datetime(self.df['ts'])
-
+        
+        self.year['year'] = self.df['ts'].dt.year
         self.df['month'] = self.df['ts'].dt.to_period('M')
         self.df['hour'] = self.df['ts'].dt.hour
 
@@ -159,7 +160,18 @@ class SpotifyAnalyzer:
         print(f"\nTOP {count} ALBUMS BY SONGS PLAYED")
         print(self.getTopAlbums(count))
 
+    def getStatsPerYear(self, count: int = 5) -> pd.DataFrame:
+        """ Return top artist, song, album, time listened per year """   
+        if count < 1:
+            raise ValueError("Add valid count number")
 
-MyTop = SpotifyAnalyzer("data", 'Martin', "Horak")
-print(MyTop.printTopUniqueMonths(12))
-print(MyTop.printTopAlbums(10))
+        result = self.df.groupby('year').agg(plays_count = ('track_name', 'count'), 
+                                              top_artist = ('artist_name', lambda x: x.value_counts().idxmax()), 
+                                              top_track = ('track_with_artist', lambda x: x.value_counts().idxmax()),
+                                              top_album = ('album_name', lambda x: x.value_counts().idxmax()),
+                                              time_spent = ('ts', 'sum'))
+
+        return result_values('year', ascending=False).head(count)
+
+
+    
