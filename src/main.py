@@ -173,15 +173,17 @@ class SpotifyAnalyzer:
 
         return result.sort_values('year', ascending=False).head(count)
 
-        def getOptPerYear(self, count: int = 10, year: str = "All", opt: str = "Artists"): 
-            dfF = self.df 
-            if year != "All":
-                dfF = dfF[dfF['year'] == int(year)]
-            
-            if opt == "Aritsts":
-            
-            elif opt == "Songs":
+    def getOptPerYear(self, count: int = 10, year: str = "All", opt: str = "Artists") -> pd.DataFrame: 
+        dfF = self.df 
+        if year != "All":
+            dfF = dfF[dfF['year'] == int(year)]
+        
+        map = {"Aritsts":'artist_name',
+                   "Songs":"track_name",
+                   "Album":"album_name"}
+        col = dfF.map.get(opt, "artist_name")
 
-            else:
+        return dfF[col].value_counts().head(count)  
+
 
 
