@@ -197,7 +197,7 @@ class SpotifyAnalyzer:
         if year != "All":
             self.df = dfF
             dfF = dfF[dfF['year'] == int(year)]
-            result = dfF.groupby(dfF['ts'].dt.month).agg(hours_played = ('sec_played', lambda.x: (x.sum() / 3600).round(2))).reset_index()
+            result = dfF.groupby(dfF['ts'].dt.month).agg(hours_played = ('sec_played', lambda x: (x.sum() / 3600).round(2))).reset_index()
 
             result.columns = ['month_num', 'hours_played']
 
@@ -207,9 +207,9 @@ class SpotifyAnalyzer:
 
             return result.sort_values('month_num')
         else:
-            result = self.df.groupby('month').agg(hours_played = ('sec_played', lambda.x: (x.sum() / 3600).round(2))).reset_index()
+            result = self.df.groupby('month').agg(hours_played = ('sec_played', lambda x: (x.sum() / 3600).round(2))).reset_index()
 
             result.columns = ['Month', 'hours_played']
             result['Month'] = result['Month'].astype(str)
 
-            return result.sort_values(hours_played, ascending = False).head(count)
+            return result.sort_values('hours_played', ascending = False).head(count)
