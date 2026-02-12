@@ -24,9 +24,9 @@ class SpotifyAnalyzer:
         self.df = self.df.drop(columns=["ip_addr", "spotify_track_uri", "platform", "offline_timestamp", "conn_country", "offline", "incognito_mode", "episode_name", "episode_show_name", "spotify_episode_uri", "audiobook_title", "audiobook_chapter_uri", "audiobook_chapter_title"])
         self.df['ts'] = pd.to_datetime(self.df['ts'])
         
-        self.df['year'] = self.df['ts'].dt.year
-        self.df['month'] = self.df['ts'].dt.to_period('M')
-        self.df['hour'] = self.df['ts'].dt.hour
+        self.df['year'] = self.df['ts'].dt.year # 2026
+        self.df['month'] = self.df['ts'].dt.to_period('M') # 2026-1 etc.
+        self.df['hour'] = self.df['ts'].dt.hour # 19, 12
 
         
         self.df["ms_played"] = self.df['ms_played'] / 1000
@@ -171,8 +171,12 @@ class SpotifyAnalyzer:
 
         return result.sort_values('year', ascending=False).head(count)
 
+    # ---------------------------------------------------------------------------------------------------------
+    # Actually using these in frontend
+    # Rest was testing
     def getTopStatsPerYearWithOpt(self, count: int = 10, year: str = "All", opt: str = "Artists") -> pd.DataFrame: 
-        dfF = self.df 
+        """ Returns DataFrame based on time period(year) and view option(opt) and top n (count)"""
+        dfF = self.df.copy() 
         if year != "All":
             dfF = dfF[dfF['year'] == int(year)]
         
@@ -182,6 +186,30 @@ class SpotifyAnalyzer:
         col = map.get(opt, "artist_name")
 
         return dfF[col].value_counts().head(count)  
+        
+    def getTopMonthsByTime(self, year: str = 'All', count: int = 10):
+        """
+            With year = 'All', returns top unique months based of most time spent listening and top n count
+            with year != 'All' returns all months with their listening time, sorted in standard order 
+        """
+        dfF = self.df.copy() 
 
+        if year != "All":
+            self.df = dfF
+            dfF = dfF[dfF['year'] == int(year)]
+            result = dfF.groupby(dfF['ts'].dt.month).agg(hours_played = ('sec_played', lambda.x: (x.sum() / 3600).round(2))).reset_index()
 
+            result.columns = ['month_num', 'hours_played']
 
+            monthMap = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 
+                       7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
+            result['Month'] = result['month_num'].map(monthMap)
+
+            return result.sort_values('month_num')
+        else:
+            result = self.df.groupby('month').agg(hours_played = ('sec_played', lambda.x: (x.sum() / 3600).round(2))).reset_index()
+
+            result.columns = ['Month', 'hours_played']
+            result['Month'] = result['Month'].astype(str)
+
+            return result.sort_values(hours_played, ascending = False).head(count)
