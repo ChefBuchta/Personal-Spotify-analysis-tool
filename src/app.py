@@ -34,9 +34,52 @@ if files:
         data.columns = [viewType, 'Play count']
         
         dynHeight = 300 + (count * 25)
-        figBar = px.bar(data, x = 'Play count', y = viewType, orientation = 'h', 
-                        color = 'Play count', color_continuous_scale = 'Greens')
+        figBar = px.bar(
+            data, 
+            x = 'Play count',
+            y = viewType,
+            orientation = 'h', 
+            color = 'Play count',
+            color_continuous_scale = 'Greens')
         figBar.update_layout(yaxis = {'categoryorder':'total ascending'},
                              height = dynHeight )
 
         st.plotly_chart(figBar, use_container_width = True)
+
+    with col2:
+        st.subheader(f"Listening Activity ({selectedYear})")
+        
+        monthData = analyzer.getTopMonthsByTime(selectedYear, count)
+        
+        figMonths = px.bar(
+            monthData,
+            x = 'Month',
+            y = 'hours_played',
+            color = 'hours_played',
+            labels = {'Month': 'Period', 'hours_played':'Hours listened'},
+            color_continuous_scale = 'Greens')
+
+        figMonths.update_layout(height=450)
+        if selectedYear != 'All':
+            figMonths.update_xaxes(categoryorder='array', 
+                                    categoryarray=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+
+        st.plotly_chart(figMonths, use_container_width=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
