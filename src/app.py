@@ -51,10 +51,11 @@ if files:
 
         hoursSpent = analyzer.getHoursSpentListening(selectedYear)
 
-        st.write(f"Time spent listening {hoursSpent} hours") 
+        st.write(f"Time spent listening **{hoursSpent}** hours") 
+        
 
         monthData = analyzer.getTopMonthsByTime(selectedYear, count)
-        
+         
         figMonths = px.bar(
             monthData,
             x = 'Month',
