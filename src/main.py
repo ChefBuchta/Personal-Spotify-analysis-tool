@@ -7,9 +7,9 @@ class SpotifyAnalyzer:
         self.sName = sName 
 
         if uploadedFiles:
-            dfList = [pd.read_json(f) for f in uploadedFiles]
-        elif folderPath: 
-            path = f'{folderPath}/Streaming_History_Audio*.json'
+            dfList = [pd.read_json(f) for f in uploadedFiles if f.name.endswith('.json')]
+        elif folderPath:
+            path = f"{folderPath}/Streaming_History_Audio*.json"
             files = glob.glob(path)
             dfList = [pd.read_json(f) for f in files]
         else:
@@ -117,15 +117,13 @@ class SpotifyAnalyzer:
 
         return self.df['ts'].dt.month.value_counts().head(count)
 
-    def printTopMonths(self, count: int = 5) -> None:
-        """Months top 'count' months, with most plays"""
-        if count < 1 or count > 12:
-            raise ValueError("Add valid count number")
+    def printTopMonths(self, count: int = 5) -> None: 
+        """Months top 'count' months, with most plays""" 
+        if count < 1 or count > 12: 
+            raise ValueError("Add valid count number") 
 
-        print(f"\nTOP {count} MONTHS BY SONGS PLAYED")
+        print(f"\nTOP {count} MONTHS BY SONGS PLAYED") 
         print(self.getTopMonths(count))
-
-
     def getTopUniqueMonths(self, count: int = 5) -> pd.DataFrame:
         """Returns top 'count' unique months, with most plays"""
         if count < 1:
@@ -173,15 +171,15 @@ class SpotifyAnalyzer:
 
         return result.sort_values('year', ascending=False).head(count)
 
-    def getOptPerYear(self, count: int = 10, year: str = "All", opt: str = "Artists") -> pd.DataFrame: 
+    def getTopStatsPerYearWithOpt(self, count: int = 10, year: str = "All", opt: str = "Artists") -> pd.DataFrame: 
         dfF = self.df 
         if year != "All":
             dfF = dfF[dfF['year'] == int(year)]
         
         map = {"Aritsts":'artist_name',
-                   "Songs":"track_name",
-                   "Album":"album_name"}
-        col = dfF.map.get(opt, "artist_name")
+                   "Songs":"track_with_artist",
+                   "Albums":"album_with_artist"}
+        col = map.get(opt, "artist_name")
 
         return dfF[col].value_counts().head(count)  
 
