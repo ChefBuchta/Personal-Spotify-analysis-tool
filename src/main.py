@@ -180,14 +180,14 @@ class SpotifyAnalyzer:
         if year != "All":
             dfF = dfF[dfF['year'] == int(year)]
         
-        map = {"Aritsts":'artist_name',
+        map = {"Artists":'artist_name',
                    "Songs":"track_with_artist",
                    "Albums":"album_with_artist"}
         col = map.get(opt, "artist_name")
 
         return dfF[col].value_counts().head(count)  
         
-    def getTopMonthsByTime(self, year: str = 'All', count: int = 10):
+    def getTopMonthsByTime(self, year: str = 'All', count: int = 10) -> pd.DataFrame:
         """
             With year = 'All', returns top unique months based of most time spent listening and top n count
             with year != 'All' returns all months with their listening time, sorted in standard order 
@@ -195,7 +195,6 @@ class SpotifyAnalyzer:
         dfF = self.df.copy() 
 
         if year != "All":
-            self.df = dfF
             dfF = dfF[dfF['year'] == int(year)]
             result = dfF.groupby(dfF['ts'].dt.month).agg(hours_played = ('sec_played', lambda x: (x.sum() / 3600).round(2))).reset_index()
 
@@ -213,3 +212,25 @@ class SpotifyAnalyzer:
             result['Month'] = result['Month'].astype(str)
 
             return result.sort_values('hours_played', ascending = False).head(count)
+
+    def getHoursSpentListening(self, year: str = 'All') -> float:
+        """ Returns hours spent listening, based on time frame """
+        if year != 'All':
+            timeSpent = self.df[self.df['year'] == int(year)]['sec_played'].sum() 
+            return (timeSpent / 3600).round(2)
+        else:
+            timeSpent = self.df['sec_played'].sum() 
+            return (timeSpent / 3600).round(2)
+
+
+
+
+
+
+
+
+
+
+
+
+
