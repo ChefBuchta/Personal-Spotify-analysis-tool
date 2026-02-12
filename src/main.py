@@ -40,137 +40,6 @@ class SpotifyAnalyzer:
         self.df['track_with_artist'] = self.df["track_name"] + ' - ' + self.df["artist_name"]
         self.df['album_with_artist'] = self.df["album_name"] + ' - ' + self.df["artist_name"]
     
-    def printTimeSpentListening(self) -> None:
-        """Prints the play time."""
-        timeSpent = self.df["sec_played"].sum()
-        print(f"TIME SPENT LISTENING {(timeSpent/3600).round(2)} HOURS {((timeSpent/60)%60).round(2)} MINUTES {(timeSpent%60).round(2)} SECONDS")
-
-    def getTopArtistBySongs(self, count: int = 5) -> pd.DataFrame:
-        """Returns top 'count' Artist by number of song plays."""
-        if count < 1:
-            raise ValueError("Add valid count number")
-
-        return self.df['artist_name'].value_counts().head(count)  
-
-    def printTop10ArtistBySongs(self, count: int = 5) -> None:
-        """Prints top 'count' artist by number of song plays."""
-        if count < 1:
-            raise ValueError("Add valid count number")
-
-        artists = self.getTopArtistBySongs(count)
-        print(f"\nTOP {count} ARTISTS BY SONGS PLAYED")
-        print(artists)
-
-    def getTopArtistByPlay(self, count: int = 5) -> pd.DataFrame:
-        """Returns top 'count' Artist by number of time spent listening."""
-        if count < 1:
-            raise ValueError("Add valid count number")
-
-        return (self.df.groupby('artist_name')['sec_played'].sum().sort_values(ascending=False).head(count) / 3600).round(2)
-
-    def printTopArtistByPlay(self, count: int = 5) -> None:
-        """Prints top 'count' Artist by number of time spent listening."""
-        if count < 1:
-            raise ValueError("Add valid count number")
-
-        artists = self.getTopArtistByPlay(count)
-        print(f"\nTOP {count} ARTISTS BY PLAYTIME")
-        print(artists)
-
-    def getTopSongsByPlay(self, count: int = 5) -> pd.DataFrame:
-        """Returns top 'count' songs by number of plays."""
-        if count < 1:
-            raise ValueError("Add valid count number")
-
-        return self.df[['track_name', 'artist_name']].value_counts().head(count) 
-
-
-    def printTopSongsByPlay(self, count: int = 5) -> None:
-        """Prints top 'count' songs by number of plays."""
-        if count < 1:
-            raise ValueError("Add valid count number")
-
-        
-        print(f"\nTOP {count} SONGS BY TIMES PLAYED")
-        print(self.getTopSongsByPlay(count))
-    
-    def getTopHours(self, count: int = 5) -> pd.DataFrame:
-        """Returns top 'count' hours in a day, with most plays"""
-        if count < 1 or count > 24:
-            raise ValueError("Add valid count number")
-
-        return self.df['hour'].value_counts().head(count)
-
-    def printTopHours(self, count: int = 5) -> None:
-        """Prints top 'count' hours in a day, with most plays"""
-        if count < 1 or count > 24:
-            raise ValueError("Add valid count number")
-
-        print(f"\nTOP {count} HOURS IN A DAY BY SONGS PLAYED")
-        print(self.getTopHours(count)
-)
-
-    def getTopMonths(self, count: int = 5) -> pd.DataFrame:
-        """Returns top 'count' months, with most plays"""
-        if count < 1 or count > 12:
-            raise ValueError("Add valid count number")
-
-        return self.df['ts'].dt.month.value_counts().head(count)
-
-    def printTopMonths(self, count: int = 5) -> None: 
-        """Months top 'count' months, with most plays""" 
-        if count < 1 or count > 12: 
-            raise ValueError("Add valid count number") 
-
-        print(f"\nTOP {count} MONTHS BY SONGS PLAYED") 
-        print(self.getTopMonths(count))
-    def getTopUniqueMonths(self, count: int = 5) -> pd.DataFrame:
-        """Returns top 'count' unique months, with most plays"""
-        if count < 1:
-            raise ValueError("Add valid count number")
-
-        result = self.df.groupby('month').agg(plays_count = ('track_name', 'count'), 
-                                              top_artist = ('artist_name', lambda x: x.value_counts().idxmax()), 
-                                              top_track = ('track_with_artist', lambda x: x.value_counts().idxmax()))
-        return result.sort_values('plays_count', ascending=False).head(count)
-
-    def printTopUniqueMonths(self, count: int = 5) -> None:
-        """Months top 'count' unique months, with most plays"""
-        if count < 1:
-            raise ValueError("Add valid count number")
-
-        months = self.getTopUniqueMonths(count)
-        print(f"\nTOP {count} UNIQUE MONTHS BY SONGS PLAYED")
-        print(months)
-    
-    def getTopAlbums(self, count):
-        """ Returns top 'count' top listened albums by songs played """
-        if count < 1:
-            raise ValueError("Add valid count number")
-        return self.df['album_with_artist'].value_counts().head(count) 
-
-    def printTopAlbums(self, count):
-        """ Print top 'count' top listened albums by songs played """
-        if count < 1:
-            raise ValueError("Add valid count number")
-
-
-        print(f"\nTOP {count} ALBUMS BY SONGS PLAYED")
-        print(self.getTopAlbums(count))
-
-    def getStatsPerYear(self, count: int = 5) -> pd.DataFrame:
-        """ Return top artist, song, album, time listened per year """   
-        if count < 1:
-            raise ValueError("Add valid count number")
-
-        result = self.df.groupby('year').agg(plays_count = ('track_name', 'count'), 
-                                              top_artist = ('artist_name', lambda x: x.value_counts().idxmax()), 
-                                              top_track = ('track_with_artist', lambda x: x.value_counts().idxmax()),
-                                              top_album = ('album_name', lambda x: x.value_counts().idxmax()),
-                                             time_spent = ('sec_played', lambda x: (x.sum() / 3600).round(2)))
-
-        return result.sort_values('year', ascending=False).head(count)
-
     # ---------------------------------------------------------------------------------------------------------
     # Actually using these in frontend
     # Rest was testing
@@ -221,6 +90,21 @@ class SpotifyAnalyzer:
         else:
             timeSpent = self.df['sec_played'].sum() 
             return (timeSpent / 3600).round(2)
+
+    def getTopHours(self, year: str = 'All', count: int = 5) -> pd.DataFrame:
+        """Returns top 'count' hours in a day, with most plays"""
+
+        if count > 24:
+            count = 24 
+
+        if year != 'All':
+            filterDf = self.df.copy()
+            filterDf = filterDf['year' == int(year)]
+            result = filterDf.value_counts().head(count)
+            return result
+        else:
+            result = self.df['hour'].value_counts().head(count)
+            return result
 
 
 
