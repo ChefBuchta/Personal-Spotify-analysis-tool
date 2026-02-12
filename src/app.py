@@ -48,7 +48,11 @@ if files:
 
     with col2:
         st.subheader(f"Listening Activity ({selectedYear})")
-        
+
+        hoursSpent = analyzer.getHoursSpentListening(selectedYear)
+
+        st.write(f"Time spent listening {hoursSpent} hours") 
+
         monthData = analyzer.getTopMonthsByTime(selectedYear, count)
         
         figMonths = px.bar(
@@ -60,11 +64,14 @@ if files:
             color_continuous_scale = 'Greens')
 
         figMonths.update_layout(height=450)
-        if selectedYear != 'All':
+        
+        if selectedYear == 'All':
+            figMonths.update_xaxes(type='category')
+        else:
             figMonths.update_xaxes(categoryorder='array', 
                                     categoryarray=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                                                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
-
+        
         st.plotly_chart(figMonths, use_container_width=True)
 
 
