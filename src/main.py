@@ -7,7 +7,7 @@ class SpotifyAnalyzer:
         self.sName = sName 
 
         if uploadedFiles:
-            dfList = [pd.read_json(f) for f in uploadedFiles if f.name.endswith('.json')]
+            dfList = [pd.read_json(f) for f in uploadedFiles if f.name.endswith('.json') and f.name.startswith('Streaming_History_Audio')]
         elif folderPath:
             path = f"{folderPath}/Streaming_History_Audio*.json"
             files = glob.glob(path)
@@ -99,11 +99,11 @@ class SpotifyAnalyzer:
 
         if year != 'All':
             filterDf = self.df.copy()
-            filterDf = filterDf['year' == int(year)]
-            result = filterDf.value_counts().head(count)
+            filterDf = filterDf[filterDf['year'] == int(year)]
+            result = filterDf['hour'].value_counts().head(count).reset_index()
             return result
         else:
-            result = self.df['hour'].value_counts().head(count)
+            result = self.df['hour'].value_counts().head(count).reset_index()
             return result
 
 
