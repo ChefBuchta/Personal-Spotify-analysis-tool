@@ -74,6 +74,32 @@ if files:
                                                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
         
         st.plotly_chart(figMonths, use_container_width=True)
+    
+    st.divider()
+
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        st.subheader(f"You've listened the most during these hours")
+
+        data = analyzer.getTopHours(selectedYear, count)
+        
+        data.columns = ['Hour', 'Play count']
+        data['Hour'] = data['Hour'].astype(str) + ":00"
+
+        figBar = px.bar(
+            data,
+            x = 'Play count',
+            y = 'Hour',
+            orientation = 'h',
+            color = 'Play count',
+            color_continuous_scale = 'Greens')
+
+        figBar.update_layout(yaxis = {'categoryorder':'total ascending'},
+                             height = dynHeight )
+
+        st.plotly_chart(figBar, use_container_width = True)
+
 
 
 
