@@ -7,15 +7,30 @@ class SpotifyAnalyzer:
         self.sName = sName 
 
         if uploadedFiles:
+            # Songs
             dfList = [pd.read_json(f) for f in uploadedFiles if f.name.endswith('.json') and f.name.startswith('Streaming_History_Audio')]
+
+            # Albums
+            dfPodcastList = [pd.read_json(f) for f in uploadedFiles if f.name.endswith('.json') and f.name.startswith('Streaming_History_Video')]
+
         elif folderPath:
+            # Songs
             path = f"{folderPath}/Streaming_History_Audio*.json"
             files = glob.glob(path)
             dfList = [pd.read_json(f) for f in files]
+
+            # Albums
+            podcastPath = f"{folderPath}/Streaming_History_Video*.json"
+            podcastFiles = glob.glob(podcastPath)
+            dfList = [pd.read_json(f) for f in files]
+
+
+
         else:
             raise FileNotFoundError("Couldn't find")
 
         self.df = pd.concat(dfList, ignore_index=True)
+        self.podcastDf = pd.concat(dfPodcastList, ignore_index=True)
         self._preprocesData()
         
     def _preprocesData(self):
