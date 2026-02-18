@@ -134,11 +134,11 @@ class SpotifyAnalyzer:
     
     def getTopPodcasts(self, year: str = 'All', count: int = 5):
         """Returns top n podcasts based on year and time spetn listening""" 
-        dfF = self.df.copy()
+        dfF = self.podcastDf.copy()
         if year != 'All':
             dfF = dfF[dfF['year'] == int(year)] 
 
-            result = dfF.groupby('episode_show_name').agg(hours_played = ('sec_played', lambda x: (x.sum() / 3600).round(2))).reset_index()
+        result = dfF.groupby('episode_show_name').agg(hours_played = ('sec_played', lambda x: (x.sum() / 3600).round(2))).reset_index()
 
         return result.sort_values('hours_played', ascending=False).head(count)
 
