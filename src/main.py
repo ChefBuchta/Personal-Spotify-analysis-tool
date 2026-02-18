@@ -58,12 +58,12 @@ class SpotifyAnalyzer:
         # Preprocesing podcasts 
         self.podcastDf = self.podcastDf.drop(columns=["platform", "conn_country", "master_metadata_album_album_name", "master_metadata_track_name", "master_metadata_album_artist_name", "spotify_track_uri", "audiobook_chapter_uri", "audiobook_title", "audiobook_uri", "audiobook_chapter_title"])
 
-        self.df['ts'] = pd.to_datetime(self.df['ts'])
-        self.podcastdf['year'] = self.podcastdf['ts'].dt.year # 2026
-        self.podcastdf['month'] = self.podcastdf['ts'].dt.to_period('M') # 2026-1 etc.
-        self.podcastdf['hour'] = self.podcastdf['ts'].dt.hour # 19, 12
+        self.podcastDf['ts'] = pd.to_datetime(self.podcastDf['ts'])
+        self.podcastDf['year'] = self.podcastDf['ts'].dt.year # 2026
+        self.podcastDf['month'] = self.podcastDf['ts'].dt.to_period('M') # 2026-1 etc.
+        self.podcastDf['hour'] = self.podcastDf['ts'].dt.hour # 19, 12
 
-        self.podcastdf["ms_played"] = self.podcastdf['ms_played'] / 1000
+        self.podcastDf["ms_played"] = self.podcastDf['ms_played'] / 1000
         self.podcastDf.rename(columns={'ms_played':'sec_played'
                                        },inplace=True)
 
