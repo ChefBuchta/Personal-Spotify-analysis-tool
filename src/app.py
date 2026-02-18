@@ -11,9 +11,14 @@ files = st.file_uploader("Upload files Streaming_History_Audio...", accept_multi
 
 if files:
     analyzer = SpotifyAnalyzer("Martin", "Horak", uploadedFiles=files)
-    
-    c1, c2, c3 = st.columns(3)
+ 
+    col_a, col_b, col_c = st.columns(3)
+    col_a.metric("Total Hours", analyzer.getHoursSpentListening('All'))
+    col_b.metric("Unique Artists", analyzer.df['artist_name'].nunique())
+    col_c.metric("Unique Tracks", analyzer.df['track_name'].nunique())
 
+    c1, c2, c3 = st.columns(3)
+    
     with c1:
         years = sorted(analyzer.df['year'].unique().tolist(), reverse = True)
         selectedYear = st.selectbox("Time frame:", ["All"] + [str(y) for y in years])
@@ -25,10 +30,10 @@ if files:
     
     st.divider()
 
-    col1, col2 = st.columns(2)
+    col11, col12 = st.columns(2)
     
-    with col1:
-        st.subheader(f"TOP {count}: {viewType} ({selectedYear})")
+    with col11:
+        st.subheader(f"TOP {count}: Artists ({selectedYear})")
 
         data = analyzer.getTopStatsPerYearWithOpt(count, selectedYear, viewType).reset_index()
         data.columns = [viewType, 'Play count']
@@ -46,7 +51,7 @@ if files:
 
         st.plotly_chart(figBar, use_container_width = True)
 
-    with col2:
+    with col12:
         st.subheader(f"Listening Activity ({selectedYear})")
 
         hoursSpent = analyzer.getHoursSpentListening(selectedYear)
@@ -118,10 +123,6 @@ if files:
                              height = dynHeight )
 
         st.plotly_chart(figPodcasts, use_container_width = True)
-
-
-
-
 
 
 
