@@ -100,9 +100,24 @@ if files:
 
         st.plotly_chart(figBar, use_container_width = True)
 
+    with col4:
+        st.subheader(f"Your most listened podcasts")
 
+        data = analyzer.getTopPodcasts(selectedYear, count)
 
+        data.columns = ['Podcast name', 'Hours spent']
 
+        figPodcasts = px.bar(
+            data,
+            x = 'Hours spent',
+            y = 'Podcast name',
+            color = 'Hours spent', 
+            color_continuous_scale = 'Greens')
+
+        figPodcasts.update_layout(yaxis = {'categoryorder':'total ascending'},
+                             height = dynHeight )
+
+        st.plotly_chart(figPodcasts, use_container_width = True)
 
 
 
