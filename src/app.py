@@ -11,38 +11,38 @@ files = st.file_uploader("Upload files Streaming_History_Audio...", accept_multi
 
 if files:
     analyzer = SpotifyAnalyzer("Martin", "Horak", uploadedFiles=files)
- 
+    
+    # Basic metrics
     col_a, col_b, col_c = st.columns(3)
     col_a.metric("Total Hours", analyzer.getHoursSpentListening('All'))
     col_b.metric("Unique Artists", analyzer.df['artist_name'].nunique())
     col_c.metric("Unique Tracks", analyzer.df['track_name'].nunique())
 
-    c1, c2, c3 = st.columns(3)
-    
+
+    # Interactive buttons for input   
+    c1, c2 = st.columns(2)
     with c1:
         years = sorted(analyzer.df['year'].unique().tolist(), reverse = True)
         selectedYear = st.selectbox("Time frame:", ["All"] + [str(y) for y in years])
     with c2:
-        viewType = st.selectbox("View TOP", ["Artists", "Songs", "Albums"])
-
-    with c3:
         count = st.slider("How many", 5, 30, 10)
     
     st.divider()
 
     col11, col12 = st.columns(2)
-    
+
+    # Shows top 'Artists' based on input
     with col11:
         st.subheader(f"TOP {count}: Artists ({selectedYear})")
 
-        data = analyzer.getTopStatsPerYearWithOpt(count, selectedYear, viewType).reset_index()
-        data.columns = [viewType, 'Play count']
+        data = analyzer.getTopStatsPerYearWithOpt(count, selectedYear, 'Artists').reset_index()
+        data.columns = ['Artists', 'Play count']
         
         dynHeight = 300 + (count * 25)
         figBar = px.bar(
             data, 
             x = 'Play count',
-            y = viewType,
+            y = 'Artists',
             orientation = 'h', 
             color = 'Play count',
             color_continuous_scale = 'Greens')
@@ -51,7 +51,55 @@ if files:
 
         st.plotly_chart(figBar, use_container_width = True)
 
+    # Shows top 'Songs' based on input
     with col12:
+        st.subheader(f"TOP {count}: Songs ({selectedYear})")
+
+        data = analyzer.getTopStatsPerYearWithOpt(count, selectedYear, 'Songs').reset_index()
+        data.columns = ['Songs', 'Play count']
+        
+        dynHeight = 300 + (count * 25)
+        figBar = px.bar(
+            data, 
+            x = 'Play count',
+            y = 'Songs',
+            orientation = 'h', 
+            color = 'Play count',
+            color_continuous_scale = 'Greens')
+        figBar.update_layout(yaxis = {'categoryorder':'total ascending'},
+                             height = dynHeight )
+
+        st.plotly_chart(figBar, use_container_width = True)
+
+
+    st.divider()
+
+    col21, col22 = st.columns(2)
+
+    # Shows top 'Albums' based on input
+    with col21:
+        st.subheader(f"TOP {count}: Albums ({selectedYear})")
+
+        data = analyzer.getTopStatsPerYearWithOpt(count, selectedYear, 'Albums').reset_index()
+        data.columns = ['Albums', 'Play count']
+        
+        dynHeight = 300 + (count * 25)
+        figBar = px.bar(
+            data, 
+            x = 'Play count',
+            y = 'Albums',
+            orientation = 'h', 
+            color = 'Play count',
+            color_continuous_scale = 'Greens')
+        figBar.update_layout(yaxis = {'categoryorder':'total ascending'},
+                             height = dynHeight )
+
+        st.plotly_chart(figBar, use_container_width = True)
+
+
+    # If year is selected shows bar graph of all months
+    # otherwise show the top unique months
+    with col22:
         st.subheader(f"Listening Activity ({selectedYear})")
 
         hoursSpent = analyzer.getHoursSpentListening(selectedYear)
@@ -80,11 +128,11 @@ if files:
         
         st.plotly_chart(figMonths, use_container_width=True)
     
-    st.divider()
 
-    col3, col4 = st.columns(2)
-    
-    with col3:
+    #TODO
+    # Shows top 'Listening hours' based on input as a heatbar 
+    col31, col32 = st.columns(2)
+    with col31:
         st.subheader(f"You've listened the most during these hours")
 
         data = analyzer.getTopHours(selectedYear, count)
@@ -104,8 +152,10 @@ if files:
                              height = dynHeight )
 
         st.plotly_chart(figBar, use_container_width = True)
+    
 
-    with col4:
+    # Shows top 'Podcasts' based on input as a bar chart
+    with col32:
         st.subheader(f"Your most listened podcasts")
 
         data = analyzer.getTopPodcasts(selectedYear, count)
