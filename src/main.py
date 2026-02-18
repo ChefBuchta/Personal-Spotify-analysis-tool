@@ -35,16 +35,16 @@ class SpotifyAnalyzer:
         
     def _preprocesData(self):
         """Internal method for cleaning and transformation of data"""
-
-        self.df = self.df.drop(columns=["ip_addr", "spotify_track_uri", "platform", "offline_timestamp", "conn_country", "offline", "incognito_mode", "episode_name", "episode_show_name", "spotify_episode_uri", "audiobook_title", "audiobook_chapter_uri", "audiobook_chapter_title"])
-        self.df['ts'] = pd.to_datetime(self.df['ts'])
         
+        # Preprocesing Songs
+        self.df = self.df.drop(columns=["ip_addr", "spotify_track_uri", "platform", "offline_timestamp", "conn_country", "offline", "incognito_mode", "episode_name", "episode_show_name", "spotify_episode_uri", "audiobook_title", "audiobook_chapter_uri", "audiobook_chapter_title"])
+
+        self.df['ts'] = pd.to_datetime(self.df['ts'])
         self.df['year'] = self.df['ts'].dt.year # 2026
         self.df['month'] = self.df['ts'].dt.to_period('M') # 2026-1 etc.
         self.df['hour'] = self.df['ts'].dt.hour # 19, 12
-
-        
         self.df["ms_played"] = self.df['ms_played'] / 1000
+
         self.df.rename(columns={'ms_played': 'sec_played', 
                                 'master_metadata_album_artist_name': 'artist_name',
                                 'master_metadata_track_name': "track_name",
@@ -54,10 +54,21 @@ class SpotifyAnalyzer:
 
         self.df['track_with_artist'] = self.df["track_name"] + ' - ' + self.df["artist_name"]
         self.df['album_with_artist'] = self.df["album_name"] + ' - ' + self.df["artist_name"]
-    
+        
+        # Preprocesing podcasts 
+        self.podcastDf = self.podcastDf.drop(columns=["platform", "conn_country", "master_metadata_album_album_name", "master_metadata_track_name", "master_metadata_album_artist_name", "spotify_track_uri", "audiobook_chapter_uri", "audiobook_title", "audiobook_uri", "audiobook_chapter_title"])
+
+        self.df['ts'] = pd.to_datetime(self.df['ts'])
+        self.podcastdf['year'] = self.podcastdf['ts'].dt.year # 2026
+        self.podcastdf['month'] = self.podcastdf['ts'].dt.to_period('M') # 2026-1 etc.
+        self.podcastdf['hour'] = self.podcastdf['ts'].dt.hour # 19, 12
+
+        self.podcastdf["ms_played"] = self.podcastdf['ms_played'] / 1000
+        self.podcastDf.rename(columns={'ms_played':'sec_played'
+                                       },inplace=True)
+
+
     # ---------------------------------------------------------------------------------------------------------
-    # Actually using these in frontend
-    # Rest was testing
     def getTopStatsPerYearWithOpt(self, count: int = 10, year: str = "All", opt: str = "Artists") -> pd.DataFrame: 
         """ Returns DataFrame based on time period(year) and view option(opt) and top n (count)"""
         dfF = self.df.copy() 
@@ -120,8 +131,16 @@ class SpotifyAnalyzer:
         else:
             result = self.df['hour'].value_counts().head(count).reset_index()
             return result
+    
+    def getTopPodcasts(self, year: str = 'All', count: int = 5):
+        """Returns top n podcasts based on year and time spetn listening""" 
+        dfF = self.df.copy()
+        if year != 'All':
+            dfF = dfF[dfF['year'] == int(year)] 
 
+            result = dfF.groupby('episode_show_name').agg(hours_played = ('sec_played', lambda x: (x.sum() / 3600).round(2))).reset_index()
 
+        return result.sort_values('hours_played', ascending=False).head(count)
 
 
 
