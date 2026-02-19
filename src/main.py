@@ -43,6 +43,9 @@ class SpotifyAnalyzer:
         self.df['year'] = self.df['ts'].dt.year # 2026
         self.df['month'] = self.df['ts'].dt.to_period('M') # 2026-1 etc.
         self.df['hour'] = self.df['ts'].dt.hour # 19, 12
+        self.df['day_of_week'] = self.df['ts'].dt.day_name()  
+        self.df['day_num'] = self.df['ts'].dt.dayoftheweek # 0-6 
+
         self.df["ms_played"] = self.df['ms_played'] / 1000
 
         self.df.rename(columns={'ms_played': 'sec_played', 
@@ -66,7 +69,6 @@ class SpotifyAnalyzer:
         self.podcastDf["ms_played"] = self.podcastDf['ms_played'] / 1000
         self.podcastDf.rename(columns={'ms_played':'sec_played'
                                        },inplace=True)
-
 
     # ---------------------------------------------------------------------------------------------------------
     def getTopStatsPerYearWithOpt(self, count: int = 10, year: str = "All", opt: str = "Artists") -> pd.DataFrame: 
@@ -142,6 +144,16 @@ class SpotifyAnalyzer:
 
         return result.sort_values('hours_played', ascending=False).head(count)
 
+    def getHeatMap(self, year: str = 'All', count: int = 10):
+        """Return Heatmap of listening time"""
+        dfF = self.df.copy()
+
+        if(year != 'All'):
+           dfF = dfF[dfF['year'] == int(year)]
+
+        heatmap_data = dfF.groupby(['day_num', 'day_of_week', 'hour']).size().reset_index()
+
+        return heatmap_data.sort_values('day_num', 'hour')
 
 
 
